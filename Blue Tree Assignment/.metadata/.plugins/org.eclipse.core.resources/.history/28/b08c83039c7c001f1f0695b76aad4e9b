@@ -1,0 +1,21 @@
+package com.company.entity;
+
+import java.time.LocalDate;
+import java.time.Period;
+
+public class EmployeeEntity {
+	
+	private Long id;
+	private String name;
+	private String email;
+	private LocalDate dob;
+	private Double salary;
+	private Boolean status;
+	private Integer age;
+	public EmployeeEntity() {}
+		public Integer getAge() {
+			return Period.between(this.dob,  LocalDate.now()).getYears();
+		}
+	
+
+}

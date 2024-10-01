@@ -1,0 +1,73 @@
+package com.company.serviceimpl;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.company.dto.EmployeeDTO;
+import com.company.entity.EmployeeEntity;
+import com.company.repository.EmployeeRepository;
+import com.company.service.EmployeeService;
+
+@Service
+
+public class EmployeeServiceImpl implements EmployeeService {
+	 
+	@Autowired
+ private EmployeeRepository employeeRepository;
+	
+  @Autowired
+  private ModelMapper  modelMaper;
+ 
+	@Override
+	public List<EmployeeDTO> getAllEmployees() {
+		List<EmployeeEntity> employees = employeeRepository.findAll();
+		return employees.stream().map(employee -> ModelMapper.map(employee, EmployeeDTO.class)).collect(Collectors.toList());
+	}
+
+	@Override
+	public Optional<EmployeeDTO> getEmployeeById(Long id) {
+		// TODO Auto-generated method stub
+		//return Optional.empty();
+        Optional<EmployeeEntity> employeeOpt = employeeRepository.findById(id);
+        return employeeOpt.map(employee -> modelMapper.map(employee, EmployeeDTO.class));
+	}
+
+	@Override
+	public EmployeeDTO addEmployee(EmployeeDTO employeeDTO) {
+		EmployeeEntity  employee = modelMapper.map(employeeDTO, EmployeeEntity.class);
+		EmployeeEntity savedEmployee = employeeRepository.save(employee);
+		return modelMapper.map(savedEmployee, EmployeeDTO.class);
+	}
+
+	@Override
+	public EmployeeDTO updateEmployee(Long id, EmployeeDTO employeeDTO) {
+		Optional<EmployeeEntity> employeeOpt = employeeRepository.findById(id);
+		if (employeeOpt.isPresent()) {
+			  EmployeeEntity employeeToUpdate = employeeOpt.get();
+			  employeeToUpdate.setName(employeeDTO.getName());
+			  employeeToUpdate.setEmail(employeeDTO.getEmail());
+	            employeeToUpdate.setDob(employeeDTO.getDob());
+	            employeeToUpdate.setSalary(employeeDTO.getSalary());
+	            employeeToUpdate.setStatus(employeeDTO.getStatus());
+	            employeeToUpdate.setAge(employeeDTO.getAge());
+	            EmployeeEntity updatedEmployee = employeeRepository.save( employeeToUpdate);
+	            return ModelMapper.map(updatedEmployee, EmployeeDTO.class);
+		} else {
+			throw new RuntimeException("Employee not found with id: " + id);
+		}
+		
+	}
+
+	@Override
+	public void deleteEmployee(Long id) {
+		employeeRepository.deleteById(id);
+		
+	}
+	
+
+}

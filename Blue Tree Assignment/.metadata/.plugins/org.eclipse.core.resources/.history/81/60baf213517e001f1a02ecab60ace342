@@ -1,0 +1,37 @@
+package com.company.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import com.company.dto.EmployeeDTO;
+import com.company.service.EmployeeService;
+
+@Controller
+
+public class IndexController {
+	@Autowired
+	private EmployeeService employeeService;
+	// Display the Employee Management System Page
+    @GetMapping("/")
+    public String viewEmployeePage(Model model) {
+        List<EmployeeDTO> employeeList = employeeService.getAllEmployees();
+        model.addAttribute("employees", employeeList);
+        model.addAttribute("employee", new EmployeeDTO()); // For form binding
+        return "index"; // assuming your HTML file is named index.html
+    }
+    // Add a new employee
+    @PostMapping("/create")
+    public String createEmployee(@ModelAttribute("employee") EmployeeDTO employee, Model model) {
+        employeeService.addEmployee(employee);
+        model.addAttribute("success", "Employee added successfully");
+        return "redirect:/"; // Refresh the main page after adding
+    }
+    // Update an existing employee
+ 
+}

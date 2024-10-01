@@ -1,0 +1,44 @@
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
+<html>
+<head>
+    <title>Employee List</title>
+    <link href="/webjars/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h2>Employee List</h2>
+        <a href="/showNewEmployeeForm" class="btn btn-primary">Add New Employee</a>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Age</th>
+                    <th>Salary</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <c:forEach var="employee" items="${listEmployees}">
+                    <tr>
+                        <td>${employee.id}</td>
+                        <td>${employee.name}</td>
+                        <td>${employee.email}</td>
+                        <td>${employee.age}</td>
+                        <td>${employee.salary}</td>
+                        <td>${employee.status}</td>
+                        <td>
+                            <a href="/showFormForUpdate/${employee.id}" class="btn btn-info">Edit</a>
+                            <a href="/deleteEmployee/${employee.id}" class="btn btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </tbody>
+        </table>
+    </div>
+    <script src="/webjars/jquery/3.6.0/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+</body>
+</html>

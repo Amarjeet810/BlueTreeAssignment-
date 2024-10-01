@@ -1,0 +1,27 @@
+package com.company.service;
+
+import java.util.List;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.company.entity.EmployeeEntity;
+import com.company.repository.EmployeeRepository;
+
+public class EmployeeService {
+	@Autowired
+	private EmployeeRepository repository;
+	public List<EmployeeEntity> getAllEmployees(){
+		return repository.findAll();
+	}
+	
+	public EmployeeEntity saveEmployee(EmployeeEntity employee) {
+		return repository.save(employee);
+		
+	}
+	public EmployeeEntity getEmployeeById(Long id) {
+		
+		return repository.findById(id).orElseThrow(() -> new RuntimeException("Employee not found"));
+	}
+
+}

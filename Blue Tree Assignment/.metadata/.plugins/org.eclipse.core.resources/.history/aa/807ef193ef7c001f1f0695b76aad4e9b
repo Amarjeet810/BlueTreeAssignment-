@@ -1,0 +1,17 @@
+package com.company.dto;
+
+import java.time.LocalDate;
+
+public class EmployeeDto {
+	 private Long id;
+	    private String name;
+	    private String email;
+	    private LocalDate dob;
+	    private Double salary;
+	    private Boolean status;
+	    private Integer age;
+	    //Default constructor
+	    public EmployeeDTO(Long id, String name, String email, LocalDate dob, Double salary, Boolean status, Integer age) {
+	    	
+	    }
+}

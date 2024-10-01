@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+        body {
+            padding-top: 20px;
+        }
+        @media (max-width: 768px) {
+            #employeeTable {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Employee List -->
+    <h2 class="mt-5 text-center">Employee List</h2>
+
+    <!-- Responsive Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover mt-3" id="employeeTable">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>DOB</th>
+                    <th>Salary</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="employeeBody">
+                <!-- Data will be populated using JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Form to Add/Edit Employee -->
+    <h3 id="formTitle" class="mt-5 text-center">Add New Employee</h3>
+    <form id="employeeForm" class="mt-4">
+        <input type="hidden" id="employeeId" /> <!-- Hidden field for employee ID -->
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" id="name" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="email">Email:</label>
+                <input type="email" class="form-control" id="email" required>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="dob">Date of Birth:</label>
+                <input type="date" class="form-control" id="dob" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="salary">Salary:</label>
+                <input type="number" class="form-control" id="salary" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="status">Status:</label>
+            <select class="form-control" id="status" required>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="submitButton">Add Employee</button>
+    </form>
+</div>
+
+<!-- Bootstrap 4 JS, jQuery, and Popper.js -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- JavaScript to Fetch Data from Backend and Handle Editing -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let isEditing = false;
+
+        // Fetch all employees on page load
+        fetchEmployees();
+
+        // Handle form submission for adding or editing an employee
+        const form = document.getElementById('employeeForm');
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const dob = document.getElementById('dob').value;
+            const salary = document.getElementById('salary').value;
+            const status = document.getElementById('status').value;
+            const employeeId = document.getElementById('employeeId').value;
+
+            // If editing, send PUT request to update employee
+            if (isEditing) {
+                fetch(`/api/employees/${employeeId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: employeeId, name, email, dob, salary, status: status === 'true' })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Employee updated successfully!');
+                    resetForm();
+                    fetchEmployees();  // Reload the employee list
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to update employee.');
+                });
+            } else {
+                // Otherwise, add a new employee
+                fetch('/api/employees', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, dob, salary, status: status === 'true' })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Employee added successfully!');
+                    resetForm();
+                    fetchEmployees();  // Reload the employee list
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to add employee.');
+                });
+            }
+        });
+
+        // Fetch employee data from backend API
+        function fetchEmployees() {
+            fetch('/api/employees')
+                .then(response => response.json())
+                .then(data => {
+                    const employeeBody = document.getElementById('employeeBody');
+                    employeeBody.innerHTML = '';  // Clear the table body
+                    data.forEach(employee => {
+                        const row = `<tr>
+                            <td>${employee.id}</td>
+                            <td>${employee.name}</td>
+                            <td>${employee.email}</td>
+                            <td>${employee.dob}</td>
+                            <td>${employee.salary}</td>
+                            <td>${employee.status ? 'Active' : 'Inactive'}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="editEmployee(${employee.id})">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteEmployee(${employee.id})">Delete</button>
+                            </td>
+                        </tr>`;
+                        employeeBody.innerHTML += row;
+                    });
+                });
+        }
+
+        // Function to populate the form with the employee data to edit
+        window.editEmployee = function(id) {
+            fetch(`/api/employees/${id}`)
+                .then(response => response.json())
+                .then(employee => {
+                    document.getElementById('employeeId').value = employee.id;
+                    document.getElementById('name').value = employee.name;
+                    document.getElementById('email').value = employee.email;
+                    document.getElementById('dob').value = employee.dob;
+                    document.getElementById('salary').value = employee.salary;
+                    document.getElementById('status').value = employee.status ? 'true' : 'false';
+
+                    document.getElementById('submitButton').innerText = 'Update Employee';
+                    document.getElementById('formTitle').innerText = 'Edit Employee';
+                    isEditing = true;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to fetch employee data.');
+                });
+        };
+
+        // Function to delete an employee
+        window.deleteEmployee = function(id) {
+            fetch(`/api/employees/${id}`, { method: 'DELETE' })
+                .then(() => {
+                    alert('Employee deleted successfully!');
+                    fetchEmployees();  // Reload employee list
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to delete employee.');
+                });
+        };
+
+        // Function to reset the form after submission
+        function resetForm() {
+            form.reset();
+            document.getElementById('employeeId').value = '';
+            document.getElementById('submitButton').innerText = 'Add Employee';
+            document.getElementById('formTitle').innerText = 'Add New Employee';
+            isEditing = false;
+        }
+    });
+</script>
+
+</body>
+</html>
